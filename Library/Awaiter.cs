@@ -33,22 +33,26 @@ namespace Library
             Log("Returning result");
             return result;
         }
+        private void ContinueOn(Action continuation, SynchronizationContext capturedContext)
+        {
+            Log("Operation finished");
+            SetResult();
+            if (capturedContext != null)
+                capturedContext.Post(_ => {continuation(), null);
+            else
+                continuation();
+        }
         public void OnCompleted(Action continuation)
         {
             if (IsCompleted)
             {
-                continuation();
+                ContinueOn(continuation, SynchronizationContext.Current);
                 return;
             }
-            var capturedContext = SynchronizationContext.Current;
             awaitable.Finished += () =>
             {
-                Log("Operation finished");
                 SetResult();
-                if (capturedContext != null)
-                    capturedContext.Post(_ => continuation(), null);
-                else
-                    continuation();
+                ContinueOn(continuation, SynchronizationContext.Current);
             };
         }
 

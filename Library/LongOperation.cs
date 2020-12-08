@@ -1,8 +1,20 @@
 ﻿using System;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Library
 {
+    public class LongOperationResult
+    {
+        private LongOperation operation;
+
+        public LongOperationResult(LongOperation operation)
+        {
+            this.operation = operation;
+        }
+        public Awaiter GetAwaiter() => new Awaiter(operation);
+    }
     public class LongOperation
     {
         private volatile bool finished;
@@ -11,18 +23,30 @@ namespace Library
             this.finished = false;
         }
 
-        public void Finish()
+        /// <summary>
+        /// Запуск длительной операции в асинхронном режиме (придумать, как доделать)
+        /// </summary>
+        /// <returns></returns>
+        public LongOperationResult StartAsync()
         {
-            if (!finished)
+            Task.Run(() =>
             {
-                finished = true;
-                Finished?.Invoke();
-            }
+                Finished += LongOperation_Finished;
+                Thread.Sleep(10000);
+                Finished.Invoke();
+            });
+            return new LongOperationResult(this);
+        }
+
+        private void LongOperation_Finished()
+        {
+            finished = true;
+            Finished -= LongOperation_Finished;
         }
 
         public event Action Finished;
        
-        public Awaiter GetAwaiter() => new Awaiter(this);
+        
         public bool IsFinished => finished;
         public Action<string> Log;
     }

@@ -10,12 +10,7 @@ namespace AsyncAwait
         {
             var operation = new LongOperation();
             operation.Log = s => Console.WriteLine(s);
-            await Task.Run(async () =>
-            {
-                await Task.Delay(5000);
-                operation.Finish();
-            });
-            await operation;
+            await operation.StartAsync();
             Console.ReadKey();
         }
     }
