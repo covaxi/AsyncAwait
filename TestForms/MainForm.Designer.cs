@@ -1,11 +1,14 @@
 ﻿
 using Library;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace TestForms
 {
+    using LongOperation = LongOperation<int>;
+
     partial class MainForm
     {
         /// <summary>
@@ -81,7 +84,11 @@ namespace TestForms
 
         public async Task StartAsync()
         {
-            var operation = new LongOperation();
+            var operation = new LongOperation(() =>
+            {
+                Thread.Sleep(2000);
+                return 0;
+            });
             operation.Log = text =>
             {
                 if (log.InvokeRequired)

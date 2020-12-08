@@ -5,49 +5,44 @@ using System.Threading.Tasks;
 
 namespace Library
 {
-    public class LongOperationResult
-    {
-        private LongOperation operation;
-
-        public LongOperationResult(LongOperation operation)
-        {
-            this.operation = operation;
-        }
-        public Awaiter GetAwaiter() => new Awaiter(operation);
-    }
-    public class LongOperation
+    public class LongOperation<T>
     {
         private volatile bool finished;
-        public LongOperation()
+        private Func<T> operation;
+
+        public LongOperation(Func<T> operation = null)
         {
             this.finished = false;
+            this.operation = operation == null ? (() => default(T)) : operation;
         }
 
         /// <summary>
         /// Запуск длительной операции в асинхронном режиме (придумать, как доделать)
         /// </summary>
         /// <returns></returns>
-        public LongOperationResult StartAsync()
+        public LongOperationResult<T> StartAsync()
         {
             Task.Run(() =>
             {
                 Finished += LongOperation_Finished;
-                Thread.Sleep(2000);
-                Finished.Invoke();
+                Result = operation();
+                Finished.Invoke(this, EventArgs.Empty);
             });
-            return new LongOperationResult(this);
+            return new LongOperationResult<T>(this);
         }
 
-        private void LongOperation_Finished()
+        private void LongOperation_Finished(object sender, EventArgs eventArgs)
         {
             finished = true;
             Finished -= LongOperation_Finished;
         }
 
-        public event Action Finished;
-       
+        public event EventHandler Finished;
         
         public bool IsFinished => finished;
+
+        public virtual T Result { get; protected set; }
+
         public Action<string> Log;
     }
 }

@@ -6,23 +6,23 @@ using System.Threading;
 
 namespace Library
 {
-    public class Awaiter : INotifyCompletion
+    using Awaiter = Library.Awaiter<int>;
+    public class Awaiter<T> : INotifyCompletion
     {
-        readonly LongOperation awaitable;
-        // int меняется на любой результат операции
-        int result;
-        public Awaiter(LongOperation awaitable)
+        readonly LongOperation<T> awaitable;
+        T result;
+        public Awaiter(LongOperation<T> awaitable)
         {
             this.awaitable = awaitable;
             Log("Awaiter created");
             if (IsCompleted)
             {
-                SetResult();
+                SetResult(awaitable.Result);
             }
         }
         public bool IsCompleted => awaitable.IsFinished;
 
-        public int GetResult()
+        public T GetResult()
         {
             if (!IsCompleted)
             {
@@ -36,13 +36,15 @@ namespace Library
         private void ContinueOn(Action continuation, SynchronizationContext capturedContext)
         {
 
-            SetResult();
+            SetResult(awaitable.Result);
             if (capturedContext != null)
+            {
                 capturedContext.Post(_ =>
                 {
                     Log("Operation finished");
                     continuation();
                 }, null);
+            }
             else
             {
                 Log("Operation finished");
@@ -56,18 +58,16 @@ namespace Library
                 ContinueOn(continuation, SynchronizationContext.Current);
                 return;
             }
-            awaitable.Finished += () =>
+            awaitable.Finished += (s ,e) =>
             {
-                SetResult();
+                SetResult(awaitable.Result);
                 ContinueOn(continuation, SynchronizationContext.Current);
             };
         }
 
-
-
-        private void SetResult()
+        private void SetResult(T t)
         {
-            result = new Random().Next();
+            result = t;
         }
 
         void Log(string text)
