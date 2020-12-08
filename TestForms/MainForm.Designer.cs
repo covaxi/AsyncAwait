@@ -2,6 +2,7 @@
 using Library;
 using System;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace TestForms
 {
@@ -34,6 +35,7 @@ namespace TestForms
         private void InitializeComponent()
         {
             this.log = new System.Windows.Forms.TextBox();
+            this.bStart = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // log
@@ -48,17 +50,28 @@ namespace TestForms
             this.log.Size = new System.Drawing.Size(776, 426);
             this.log.TabIndex = 0;
             // 
+            // bStart
+            // 
+            this.bStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.bStart.Location = new System.Drawing.Point(710, 15);
+            this.bStart.Name = "bStart";
+            this.bStart.Size = new System.Drawing.Size(75, 23);
+            this.bStart.TabIndex = 1;
+            this.bStart.Text = "Start";
+            this.bStart.UseVisualStyleBackColor = true;
+            this.bStart.Click += new System.EventHandler(this.bStart_ClickAsync);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.bStart);
             this.Controls.Add(this.log);
             this.Name = "MainForm";
-            this.Text = "Main form";
+            this.Text = "Awaiting any long operation";
             this.ResumeLayout(false);
             this.PerformLayout();
-            Task.Run(async () => await StartAsync());
 
         }
 
@@ -69,10 +82,20 @@ namespace TestForms
         public async Task StartAsync()
         {
             var operation = new LongOperation();
-            operation.Log = text => log.Text += text + Environment.NewLine;
+            operation.Log = text =>
+            {
+                if (log.InvokeRequired)
+                {
+                    log.Invoke((MethodInvoker)delegate { log.Text += text + Environment.NewLine; });
+                }
+                else
+                    log.Text += text + Environment.NewLine;
+            };
 
             await operation.StartAsync();
         }
+
+        private Button bStart;
     }
 }
 

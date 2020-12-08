@@ -11,6 +11,7 @@ namespace AsyncAwait
             var operation = new LongOperation();
             operation.Log = s => Console.WriteLine(s);
             await operation.StartAsync();
+            Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
         }
     }

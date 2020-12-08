@@ -35,7 +35,7 @@ namespace Library
         }
         private void ContinueOn(Action continuation, SynchronizationContext capturedContext)
         {
-            
+
             SetResult();
             if (capturedContext != null)
                 capturedContext.Post(_ =>
@@ -70,6 +70,9 @@ namespace Library
             result = new Random().Next();
         }
 
-        void Log(string text) => awaitable?.Log(text);
+        void Log(string text)
+        {
+            awaitable?.Log(text);
+        }
     }
 }

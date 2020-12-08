@@ -17,5 +17,11 @@ namespace TestForms
             InitializeComponent();
         }
 
+        private async void bStart_ClickAsync(object sender, EventArgs e)
+        {
+            bStart.Enabled = false;
+            await StartAsync();
+            bStart.Enabled = true;
+        }
     }
 }
