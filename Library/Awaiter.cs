@@ -35,12 +35,19 @@ namespace Library
         }
         private void ContinueOn(Action continuation, SynchronizationContext capturedContext)
         {
-            Log("Operation finished");
+            
             SetResult();
             if (capturedContext != null)
-                capturedContext.Post(_ => {continuation(), null);
+                capturedContext.Post(_ =>
+                {
+                    Log("Operation finished");
+                    continuation();
+                }, null);
             else
+            {
+                Log("Operation finished");
                 continuation();
+            }
         }
         public void OnCompleted(Action continuation)
         {

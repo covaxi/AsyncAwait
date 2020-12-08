@@ -71,13 +71,7 @@ namespace TestForms
             var operation = new LongOperation();
             operation.Log = text => log.Text += text + Environment.NewLine;
 
-            Task.Run(async () =>
-            {
-                await Task.Delay(5000);
-                operation.Finish();
-            });
-
-            await operation;
+            await operation.StartAsync();
         }
     }
 }

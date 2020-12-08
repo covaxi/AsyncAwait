@@ -32,7 +32,7 @@ namespace Library
             Task.Run(() =>
             {
                 Finished += LongOperation_Finished;
-                Thread.Sleep(10000);
+                Thread.Sleep(2000);
                 Finished.Invoke();
             });
             return new LongOperationResult(this);
